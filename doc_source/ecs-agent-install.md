@@ -5,7 +5,7 @@ If your container instance was not launched using an Amazon ECS\-optimized AMI, 
 + For Amazon Linux AMI instances, you can install the agent using the Amazon YUM repo\. For more information, see [Installing the Amazon ECS Container Agent on an Amazon Linux AMI EC2 Instance](#ecs-agent-install-amazonlinux)\.
 + For non\-Amazon Linux instances, you can either download the agent from one of the regional S3 buckets or from Docker Hub\. If you download from one of the regional S3 buckets, you can optionally verify the validity of the container agent file using the PGP signature\. For more information, see [Installing the Amazon ECS Container Agent on a non\-Amazon Linux EC2 Instance](#ecs-agent-install-nonamazonlinux)
 
-**Note**  
+**Note**
 The systemd units for both ECS and Docker services have a directive to wait for `cloud-init` to finish before starting both services\. The `cloud-init` process is not considered finished until your Amazon EC2 user data has finished running\. Therefore, starting ECS or Docker via Amazon EC2 user data may cause a deadlock\. To start the container agent using Amazon EC2 user data you can use `systemctl enable --now --no-block ecs.service`\.
 
 ## Installing the Amazon ECS Container Agent on an Amazon Linux 2 EC2 Instance<a name="ecs-agent-install-al2"></a>
@@ -30,12 +30,15 @@ To install the Amazon ECS container agent on an Amazon Linux 2 EC2 instance usin
    [ec2-user ~]$ sudo amazon-linux-extras install -y ecs; sudo systemctl enable --now ecs
    ```
 
+**Note**
+Starting ecs via ```sudo systemctl enable --now ecs``` will wait until cloud-init is done running, and cloud-init is done AFTER userdata is done running.  Therefore, you can start ecs via ```sudo systemctl enable --now --no-block ecs``` to prevent this potential hang.
+
 1. \(Optional\) You can verify that the agent is running and see some information about your new container instance with the agent introspection API\. For more information, see [Amazon ECS Container Agent Introspection](ecs-agent-introspection.md)\.
 
    ```
    [ec2-user ~]$ curl -s http://localhost:51678/v1/metadata | python -mjson.tool
    ```
-**Note**  
+**Note**
 If you get no response, ensure that you associated the Amazon ECS container instance IAM role when launching the instance\. For more information, see [Amazon ECS Container Instance IAM Role](instance_IAM_role.md)\.
 
 ## Installing the Amazon ECS Container Agent on an Amazon Linux AMI EC2 Instance<a name="ecs-agent-install-amazonlinux"></a>
@@ -92,26 +95,26 @@ To install the Amazon ECS container agent on a non\-Amazon Linux EC2 instance, y
 The latest Amazon ECS container agent files, by Region, are listed below for reference\.
 
 
-| Region | Region Name | Container agent | Container agent signature | 
-| --- | --- | --- | --- | 
-| us\-east\-2 | US East \(Ohio\) | [ECS container agent](https://s3.us-east-2.amazonaws.com/amazon-ecs-agent-us-east-2/ecs-agent-latest.tar) | [PGP signature](https://s3.us-east-2.amazonaws.com/amazon-ecs-agent-us-east-2/ecs-agent-latest.tar.asc) | 
-| us\-east\-1 | US East \(N\. Virginia\) | [ECS container agent](https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar.asc) | 
-| us\-west\-1 | US West \(N\. California\) | [ECS container agent](https://s3.us-west-1.amazonaws.com/amazon-ecs-agent-us-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-west-1.amazonaws.com/amazon-ecs-agent-us-west-1/ecs-agent-latest.tar.asc) | 
-| us\-west\-2 | US West \(Oregon\) | [ECS container agent](https://s3.us-west-2.amazonaws.com/amazon-ecs-agent-us-west-2/ecs-agent-latest.tar) | [PGP signature](https://s3.us-west-2.amazonaws.com/amazon-ecs-agent-us-west-2/ecs-agent-latest.tar.asc) | 
-| ap\-east\-1 | Asia Pacific \(Hong Kong\) | [ECS container agent](https://s3.ap-east-1.amazonaws.com/amazon-ecs-agent-ap-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-east-1.amazonaws.com/amazon-ecs-agent-ap-east-1/ecs-agent-latest.tar.asc) | 
-| ap\-northeast\-1 | Asia Pacific \(Tokyo\) | [ECS container agent](https://s3.ap-northeast-1.amazonaws.com/amazon-ecs-agent-ap-northeast-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-northeast-1.amazonaws.com/amazon-ecs-agent-ap-northeast-1/ecs-agent-latest.tar.asc) | 
-| ap\-northeast\-2 | Asia Pacific \(Seoul\) | [ECS container agent](https://s3.ap-northeast-2.amazonaws.com/amazon-ecs-agent-ap-northeast-2/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-northeast-2.amazonaws.com/amazon-ecs-agent-ap-northeast-2/ecs-agent-latest.tar.asc) | 
-| ap\-south\-1 | Asia Pacific \(Mumbai\) | [ECS container agent](https://s3.ap-south-1.amazonaws.com/amazon-ecs-agent-ap-south-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-south-1.amazonaws.com/amazon-ecs-agent-ap-south-1/ecs-agent-latest.tar.asc) | 
-| ap\-southeast\-1 | Asia Pacific \(Singapore\) | [ECS container agent](https://s3.ap-southeast-1.amazonaws.com/amazon-ecs-agent-ap-southeast-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-southeast-1.amazonaws.com/amazon-ecs-agent-ap-southeast-1/ecs-agent-latest.tar.asc) | 
-| ap\-southeast\-2 | Asia Pacific \(Sydney\) | [ECS container agent](https://s3.ap-southeast-2.amazonaws.com/amazon-ecs-agent-ap-southeast-2/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-southeast-2.amazonaws.com/amazon-ecs-agent-ap-southeast-2/ecs-agent-latest.tar.asc) | 
-| ca\-central\-1 | Canada \(Central\) | [ECS container agent](https://s3.ca-central-1.amazonaws.com/amazon-ecs-agent-ca-central-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ca-central-1.amazonaws.com/amazon-ecs-agent-ca-central-1/ecs-agent-latest.tar.asc) | 
-| eu\-central\-1 | Europe \(Frankfurt\) | [ECS container agent](https://s3.eu-central-1.amazonaws.com/amazon-ecs-agent-eu-central-1/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-central-1.amazonaws.com/amazon-ecs-agent-eu-central-1/ecs-agent-latest.tar.asc) | 
-| eu\-west\-1 | Europe \(Ireland\) | [ECS container agent](https://s3.eu-west-1.amazonaws.com/amazon-ecs-agent-eu-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-1.amazonaws.com/amazon-ecs-agent-eu-west-1/ecs-agent-latest.tar.asc) | 
-| eu\-west\-2 | Europe \(London\) | [ECS container agent](https://s3.eu-west-2.amazonaws.com/amazon-ecs-agent-eu-west-2/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-2.amazonaws.com/amazon-ecs-agent-eu-west-2/ecs-agent-latest.tar.asc) | 
-| eu\-west\-3 | Europe \(Paris\) | [ECS container agent](https://s3.eu-west-3.amazonaws.com/amazon-ecs-agent-eu-west-3/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-3.amazonaws.com/amazon-ecs-agent-eu-west-3/ecs-agent-latest.tar.asc) | 
-| sa\-east\-1 | South America \(São Paulo\) | [ECS container agent](https://s3.sa-east-1.amazonaws.com/amazon-ecs-agent-sa-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.sa-east-1.amazonaws.com/amazon-ecs-agent-sa-east-1/ecs-agent-latest.tar.asc) | 
-| us\-gov\-east\-1 | AWS GovCloud \(US\-East\) | [ECS container agent](https://s3.us-gov-east-1.amazonaws.com/amazon-ecs-agent-us-gov-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-gov-east-1.amazonaws.com/amazon-ecs-agent-us-gov-east-1/ecs-agent-latest.tar.asc) | 
-| us\-gov\-west\-1 | AWS GovCloud \(US\-West\) | [ECS container agent](https://s3.us-gov-west-1.amazonaws.com/amazon-ecs-agent-us-gov-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-gov-west-1.amazonaws.com/amazon-ecs-agent-us-gov-west-1/ecs-agent-latest.tar.asc) | 
+| Region | Region Name | Container agent | Container agent signature |
+| --- | --- | --- | --- |
+| us\-east\-2 | US East \(Ohio\) | [ECS container agent](https://s3.us-east-2.amazonaws.com/amazon-ecs-agent-us-east-2/ecs-agent-latest.tar) | [PGP signature](https://s3.us-east-2.amazonaws.com/amazon-ecs-agent-us-east-2/ecs-agent-latest.tar.asc) |
+| us\-east\-1 | US East \(N\. Virginia\) | [ECS container agent](https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar.asc) |
+| us\-west\-1 | US West \(N\. California\) | [ECS container agent](https://s3.us-west-1.amazonaws.com/amazon-ecs-agent-us-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-west-1.amazonaws.com/amazon-ecs-agent-us-west-1/ecs-agent-latest.tar.asc) |
+| us\-west\-2 | US West \(Oregon\) | [ECS container agent](https://s3.us-west-2.amazonaws.com/amazon-ecs-agent-us-west-2/ecs-agent-latest.tar) | [PGP signature](https://s3.us-west-2.amazonaws.com/amazon-ecs-agent-us-west-2/ecs-agent-latest.tar.asc) |
+| ap\-east\-1 | Asia Pacific \(Hong Kong\) | [ECS container agent](https://s3.ap-east-1.amazonaws.com/amazon-ecs-agent-ap-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-east-1.amazonaws.com/amazon-ecs-agent-ap-east-1/ecs-agent-latest.tar.asc) |
+| ap\-northeast\-1 | Asia Pacific \(Tokyo\) | [ECS container agent](https://s3.ap-northeast-1.amazonaws.com/amazon-ecs-agent-ap-northeast-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-northeast-1.amazonaws.com/amazon-ecs-agent-ap-northeast-1/ecs-agent-latest.tar.asc) |
+| ap\-northeast\-2 | Asia Pacific \(Seoul\) | [ECS container agent](https://s3.ap-northeast-2.amazonaws.com/amazon-ecs-agent-ap-northeast-2/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-northeast-2.amazonaws.com/amazon-ecs-agent-ap-northeast-2/ecs-agent-latest.tar.asc) |
+| ap\-south\-1 | Asia Pacific \(Mumbai\) | [ECS container agent](https://s3.ap-south-1.amazonaws.com/amazon-ecs-agent-ap-south-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-south-1.amazonaws.com/amazon-ecs-agent-ap-south-1/ecs-agent-latest.tar.asc) |
+| ap\-southeast\-1 | Asia Pacific \(Singapore\) | [ECS container agent](https://s3.ap-southeast-1.amazonaws.com/amazon-ecs-agent-ap-southeast-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-southeast-1.amazonaws.com/amazon-ecs-agent-ap-southeast-1/ecs-agent-latest.tar.asc) |
+| ap\-southeast\-2 | Asia Pacific \(Sydney\) | [ECS container agent](https://s3.ap-southeast-2.amazonaws.com/amazon-ecs-agent-ap-southeast-2/ecs-agent-latest.tar) | [PGP signature](https://s3.ap-southeast-2.amazonaws.com/amazon-ecs-agent-ap-southeast-2/ecs-agent-latest.tar.asc) |
+| ca\-central\-1 | Canada \(Central\) | [ECS container agent](https://s3.ca-central-1.amazonaws.com/amazon-ecs-agent-ca-central-1/ecs-agent-latest.tar) | [PGP signature](https://s3.ca-central-1.amazonaws.com/amazon-ecs-agent-ca-central-1/ecs-agent-latest.tar.asc) |
+| eu\-central\-1 | Europe \(Frankfurt\) | [ECS container agent](https://s3.eu-central-1.amazonaws.com/amazon-ecs-agent-eu-central-1/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-central-1.amazonaws.com/amazon-ecs-agent-eu-central-1/ecs-agent-latest.tar.asc) |
+| eu\-west\-1 | Europe \(Ireland\) | [ECS container agent](https://s3.eu-west-1.amazonaws.com/amazon-ecs-agent-eu-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-1.amazonaws.com/amazon-ecs-agent-eu-west-1/ecs-agent-latest.tar.asc) |
+| eu\-west\-2 | Europe \(London\) | [ECS container agent](https://s3.eu-west-2.amazonaws.com/amazon-ecs-agent-eu-west-2/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-2.amazonaws.com/amazon-ecs-agent-eu-west-2/ecs-agent-latest.tar.asc) |
+| eu\-west\-3 | Europe \(Paris\) | [ECS container agent](https://s3.eu-west-3.amazonaws.com/amazon-ecs-agent-eu-west-3/ecs-agent-latest.tar) | [PGP signature](https://s3.eu-west-3.amazonaws.com/amazon-ecs-agent-eu-west-3/ecs-agent-latest.tar.asc) |
+| sa\-east\-1 | South America \(São Paulo\) | [ECS container agent](https://s3.sa-east-1.amazonaws.com/amazon-ecs-agent-sa-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.sa-east-1.amazonaws.com/amazon-ecs-agent-sa-east-1/ecs-agent-latest.tar.asc) |
+| us\-gov\-east\-1 | AWS GovCloud \(US\-East\) | [ECS container agent](https://s3.us-gov-east-1.amazonaws.com/amazon-ecs-agent-us-gov-east-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-gov-east-1.amazonaws.com/amazon-ecs-agent-us-gov-east-1/ecs-agent-latest.tar.asc) |
+| us\-gov\-west\-1 | AWS GovCloud \(US\-West\) | [ECS container agent](https://s3.us-gov-west-1.amazonaws.com/amazon-ecs-agent-us-gov-west-1/ecs-agent-latest.tar) | [PGP signature](https://s3.us-gov-west-1.amazonaws.com/amazon-ecs-agent-us-gov-west-1/ecs-agent-latest.tar.asc) |
 
 **To install the Amazon ECS container agent on a non\-Amazon Linux EC2 instance**
 
@@ -120,7 +123,7 @@ The latest Amazon ECS container agent files, by Region, are listed below for ref
 1. Connect to your instance\.
 
 1. Install the latest version of Docker on your instance\.
-**Note**  
+**Note**
 The Amazon Linux AMI always includes the recommended version of Docker for use with Amazon ECS\. You can install Docker on Amazon Linux with the sudo yum install docker \-y command\.
 
 1. Check your Docker version to verify that your system meets the minimum version requirement\.
@@ -161,12 +164,12 @@ The Amazon Linux AMI always includes the recommended version of Docker for use w
    ```
 
 1. Write the new iptables configuration to your operating system\-specific location\.
-   + For Debian/Ubuntu: 
+   + For Debian/Ubuntu:
 
      ```
      sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
      ```
-   + For CentOS/RHEL: 
+   + For CentOS/RHEL:
 
      ```
      sudo sh -c 'iptables-save > /etc/sysconfig/iptables'
@@ -190,18 +193,18 @@ The Amazon Linux AMI always includes the recommended version of Docker for use w
    ECS_CLUSTER=default
    ```
 
-   For more information about these and other agent runtime options, see [Amazon ECS Container Agent Configuration](ecs-agent-config.md)\. 
-**Note**  
+   For more information about these and other agent runtime options, see [Amazon ECS Container Agent Configuration](ecs-agent-config.md)\.
+**Note**
 You can optionally store your agent environment variables in Amazon S3 \(which can be downloaded to your container instances at launch time using Amazon EC2 user data\)\. This is recommended for sensitive information such as authentication credentials for private repositories\. For more information, see [Storing Container Instance Configuration in Amazon S3](ecs-agent-config.md#ecs-config-s3) and [Private registry authentication for tasks](private-auth.md)\.
 
 1. Pull and run the latest Amazon ECS container agent on your container instance\.
-**Note**  
+**Note**
 Use Docker restart policies or a process manager \(such as upstart or systemd\) to treat the container agent as a service or a daemon and ensure that it is restarted after exiting\. For more information, see [Automatically start containers](https://docs.docker.com/engine/admin/host_integration/) and [Restart policies](https://docs.docker.com/engine/reference/run/#restart-policies-restart) in the Docker documentation\. The Linux variants of the Amazon ECS\-optimized AMI use the `ecs-init` RPM for this purpose, and you can view the [source code for this RPM](https://github.com/aws/amazon-ecs-init) on GitHub\. For example systemd unit files for Ubuntu 16\.04 and CentOS 7, see [Example Container Instance User Data Configuration Scripts](example_user_data_scripts.md)\.
 
    The following example of the agent run command is broken into separate lines to show each option\. For more information about these and other agent runtime options, see [Amazon ECS Container Agent Configuration](ecs-agent-config.md)\.
-**Important**  
-Operating systems with SELinux enabled require the `--privileged` option in your docker run command\. In addition, for SELinux\-enabled container instances, we recommend that you add the `:Z` option to the `/log` and `/data` volume mounts\. However, the host mounts for these volumes must exist before you run the command or you receive a `no such file or directory` error\. Take the following action if you experience difficulty running the Amazon ECS agent on an SELinux\-enabled container instance:  
-Create the host volume mount points on your container instance\.  
+**Important**
+Operating systems with SELinux enabled require the `--privileged` option in your docker run command\. In addition, for SELinux\-enabled container instances, we recommend that you add the `:Z` option to the `/log` and `/data` volume mounts\. However, the host mounts for these volumes must exist before you run the command or you receive a `no such file or directory` error\. Take the following action if you experience difficulty running the Amazon ECS agent on an SELinux\-enabled container instance:
+Create the host volume mount points on your container instance\.
 
      ```
      ubuntu:~$ sudo mkdir -p /var/log/ecs /var/lib/ecs/data
@@ -214,14 +217,14 @@ Append the `:Z` option to the `/log` and `/data` container volume mounts \(for e
       ```
       ubuntu:~$ curl -o ecs-agent.tar https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar
       ```
-**Note**  
-To download other versions of the Amazon ECS container agent, use one of the following formats, changing the version number in the URL:  
+**Note**
+To download other versions of the Amazon ECS container agent, use one of the following formats, changing the version number in the URL:
 
       ```
       ecs-agent-<version>.tar
       ecs-agent-<SHA>.tar
       ```
-For example:  
+For example:
 
       ```
       https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-v1.18.0.tar
@@ -248,10 +251,10 @@ For example:
       --env-file=/etc/ecs/ecs.config \
       amazon/amazon-ecs-agent:latest
       ```
-**Important**  
+**Important**
 The `host` network mode is the only supported network mode for the container agent container\. For more information, see [Running the Amazon ECS Container Agent with Host Network Mode](#container_agent_host)\.
-**Note**  
-If you receive an `Error response from daemon: Cannot start container` message, you can delete the failed container with the sudo docker rm ecs\-agent command and try running the agent again\. 
+**Note**
+If you receive an `Error response from daemon: Cannot start container` message, you can delete the failed container with the sudo docker rm ecs\-agent command and try running the agent again\.
 
 1. \(Optional\) If you downloaded the Amazon ECS container agent file from S3, you can verify the validity of the file\.
 
@@ -270,7 +273,7 @@ If you receive an `Error response from daemon: Cannot start container` message, 
          ```
          -----BEGIN PGP PUBLIC KEY BLOCK-----
          Version: GnuPG v2
-         
+
          mQINBFq1SasBEADliGcT1NVJ1ydfN8DqebYYe9ne3dt6jqKFmKowLmm6LLGJe7HU
          jGtqhCWRDkN+qPpHqdArRgDZAtn2pXY5fEipHgar4CP8QgRnRMO2fl74lmavr4Vg
          7K/KH8VHlq2uRw32/B94XLEgRbGTMdWFdKuxoPCttBQaMj3LGn6Pe+6xVWRkChQu
@@ -420,7 +423,7 @@ If you receive an `Error response from daemon: Cannot start container` message, 
    1. Download the ECS container agent signature\. ECS container agent signatures are ascii detached PGP signatures stored in files with the extension `.asc`\. The signatures file has the same name as its corresponding executable, with `.asc` appended\.
 
       ```
-      curl -o ecs-agent.asc https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar.asc 
+      curl -o ecs-agent.asc https://s3.amazonaws.com/amazon-ecs-agent-us-east-1/ecs-agent-latest.tar.asc
       ```
 
    1. Verify the signature\.
@@ -439,12 +442,12 @@ If you receive an `Error response from daemon: Cannot start container` message, 
       Primary key fingerprint: F34C 3DDA E729 26B0 79BE  AEC6 BCE9 D9A4 2D51 784F
            Subkey fingerprint: D64B B6F9 0CF3 77E9 B5FB  346F 50DE CCC4 710E 61AF
       ```
-**Note**  
+**Note**
 The warning in the output is expected and is not problematic; it occurs because there is not a chain of trust between your personal PGP key \(if you have one\) and the Amazon ECS PGP key\. For more information, see [Web of trust](https://en.wikipedia.org/wiki/Web_of_trust)\.
 
 ## Running the Amazon ECS Container Agent with Host Network Mode<a name="container_agent_host"></a>
 
-When running the Amazon ECS container agent, `ecs-init` will create the container agent container with the `host` network mode\. This is the only supported network mode for the container agent container\. 
+When running the Amazon ECS container agent, `ecs-init` will create the container agent container with the `host` network mode\. This is the only supported network mode for the container agent container\.
 
 This enables you to block access to the [Amazon EC2 instance metadata service endpoint](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html) \(`http://169.254.169.254`\) for the containers started by the container agent\. This ensures that containers cannot access IAM role credentials from the container instance profile and enforces that tasks use only the IAM task role credentials\. For more information, see [IAM Roles for Tasks](task-iam-roles.md)\.
 
